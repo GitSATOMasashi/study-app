@@ -22,7 +22,7 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true,
-    "types": ["@testing-library/jest-dom"] // 追加
+    "types": ["vite/client", "@testing-library/jest-dom"]
   },
   "include": ["src"]
 }
