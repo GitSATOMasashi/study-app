@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import supabase from "./supabase";
+import { addRecord, fetchRecords } from "./supabase";
 
 type Record = {
   id: number;
@@ -14,20 +14,12 @@ function App() {
   const [isError, setIsError] = useState("");
 
   useEffect(() => {
-    const fetchRecords = async () => {
-      const { data, error } = (await supabase.from("records").select()) as {
-        data: Record[];
-        error: Error | null;
-      };
-      if (error) {
-        setIsError(error.message);
-        return;
-      }
-
-      setRecords(data);
+    const setupRecords = async () => {
+      const records = await fetchRecords();
+      setRecords(records);
     };
-
-    fetchRecords();
+    
+    setupRecords();
   }, []);
 
   const handleAddRecord = async () => {
@@ -35,16 +27,8 @@ function App() {
       setIsError("学習内容と学習時間を入力してください");
       return;
     }
-    // setRecords([...records, { title: learningContent, time: learningTime }]);
-    const { data, error } = await supabase
-      .from("records")
-      .insert({ title: learningContent, time: learningTime })
-      .select();
-    if (error) {
-      setIsError(error.message);
-      return;
-    }
 
+    const data = await addRecord(learningContent, learningTime);
     setRecords([...records, data[0]]);
     setLearningContent("");
     setLearningTime(0);
@@ -61,16 +45,18 @@ function App() {
         <div>
           <h1>学習記録アプリ！！</h1>
           <div>
-            <label>学習内容</label>
+            <label htmlFor="study-content">学習内容</label>
             <input
+              id="study-content"
               onChange={(e) => setLearningContent(e.target.value)}
               value={learningContent}
               type="text"
             />
           </div>
           <div>
-            <label>学習時間</label>
+            <label htmlFor="study-time">学習時間</label>
             <input
+              id="study-time"
               onChange={(e) => setLearningTime(Number(e.target.value))}
               value={learningTime}
               type="number"
@@ -81,7 +67,7 @@ function App() {
           <ul>
             {records.map((record) => (
               <li key={record.title}>
-                {record.id} - {record.title} - {record.time}時間
+                {record.title} - {record.time}時間
               </li>
             ))}
           </ul>
